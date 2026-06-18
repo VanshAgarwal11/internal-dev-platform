@@ -10,10 +10,12 @@ Newest entries at the top.
 **Goal:** Set up the toolchain, scaffold the repo, and bring up a local k3d cluster.
 
 **Did:**
-- (fill this in as you go)
+- Installed the ToolChain (Docker, K3d, helm and kubectl)
+- Scaffolded the repository
+- Initialized Git and made the first commit
+- Create the k3d cluster
+- Push to GitHub 
 
-**Broke / learned:**
-- (note anything that tripped you up)
 
 **Next:**
 - Phase 2: ingress, cert-manager, namespaced environments
