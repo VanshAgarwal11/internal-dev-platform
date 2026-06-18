@@ -1,0 +1,12 @@
+.DS_Store
+*.log
+.env
+.env.*
+kubeconfig
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+secrets/
+*.key
+*.pem
