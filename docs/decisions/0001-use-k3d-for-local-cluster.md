@@ -1,7 +1,7 @@
 # ADR 0001: Use k3d for the local Kubernetes cluster
 
 **Status:** Accepted
-**Date:** (today's date)
+**Date:** 18th June 2026
 
 ## Context
 This project needs a local Kubernetes cluster that runs on an Apple Silicon

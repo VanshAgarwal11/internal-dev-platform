@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: dev
+spec:
+  limits:
+    - default:
+        cpu: 150m
+        memory: 192Mi
+      defaultRequest:
+        cpu: 50m
+        memory: 64Mi
+      type: Container
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: staging
+spec:
+  limits:
+    - default:
+        cpu: 150m
+        memory: 192Mi
+      defaultRequest:
+        cpu: 50m
+        memory: 64Mi
+      type: Container
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: prod
+spec:
+  limits:
+    - default:
+        cpu: 200m
+        memory: 256Mi
+      defaultRequest:
+        cpu: 75m
+        memory: 96Mi
+      type: Container
