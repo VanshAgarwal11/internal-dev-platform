@@ -66,7 +66,7 @@ Phase 4. 16 GB can't run every component at once — bring stacks up/down per ph
 
 ## Current status — UPDATE THIS EACH DAY
 
-**Last updated:** End of Day 2 (2026-06-19)
+**Last updated:** End of Day 3 (2026-06-20)
 
 **Done so far:**
 - Day 1: toolchain installed (Docker, k3d, helm, kubectl); repo scaffolded;
@@ -76,6 +76,7 @@ Phase 4. 16 GB can't run every component at once — bring stacks up/down per ph
   LimitRanges right-sized to real capacity; NetworkPolicy investigation (see
   below); Traefik inspected (bundled, not reinstalled); cert-manager installed
   via Helm; self-signed ClusterIssuer created and READY=True.
+- Day 3: hello app deployed across all three envs via Kustomize
 
 **Key finding from Day 2 (important context):** This cluster DOES enforce the
 *deny* half of NetworkPolicy but NOT the *allow* (ingress `from`) half — proven
@@ -86,9 +87,8 @@ now; the YAML stays in the repo as intent.
 **ADRs so far:** 0001 (use k3d), 0002 (namespace-per-environment isolation),
 0003 (migrate to Calico — Proposed, not yet done).
 
-**Next up (Day 3):** Deploy the first sample app across all 3 environments and
-reach it over HTTPS through Traefik. (Possibly do the Calico migration first as
-its own task — TBD.)
+**Next up (Day 4):** Setup ingress on the hello app to make the pod accessible via browser.
+Start with setting up ArgoCD
 
 **How to resume:** Read this file + docs/devlog.md + docs/decisions/ in the repo
 to see exactly where things stand. The committed repo is the ground truth.

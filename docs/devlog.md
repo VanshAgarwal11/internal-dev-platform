@@ -4,6 +4,30 @@ A running journal of what I built, what broke, and what I learned.
 Newest entries at the top.
 
 ---
+## Day 3 — First app deployed across all environments with Kustomize
+
+**Goal:** Deploy a real app (hello) into dev, staging, and prod from a single
+source of truth, and learn the pattern that avoids per-environment config drift.
+
+**Did:**
+- Wrote my first Deployment and Service YAML myself (from official boilerplate, then edited)
+- Deployed hello to dev; confirmed the Service routed traffic (got the nginx page back)
+- Restructured into a Kustomize base + dev/staging/prod overlays
+- Deployed to all three environments; prod runs 2 replicas via an overlay patch
+- Switched to small, per-logical-unit commits
+
+**Learned:** 
+- Deployment → ReplicaSet → Pod chain: The apps run inside pods and all the pods are created inside a replicaset to manage scaling and HA in a deployment.
+- LimitRange auto-injection: The limit ranges applied on a namespace automaticlly applies if a deployment yaml file doesnt explicitly state the limits
+- Why the Kustomize base must be environment-agnostic: So that each enviroment overlay file can use it as a base to build upon and add environment specific configurations.
+- `kubectl kustomize` vs `apply -k`: `kubectl kustomize <overlay>` builds and prints the merged YAML to the terminal without touching the cluster (a preview); `kubectl apply -k <overlay>` builds the same YAML and applies it to the cluster. Preview-then-apply is the safe habit.
+- Small commits — why they help: For easy granular control and might help later to precisely find the right place to look at when something breaks.
+
+**Next:**
+- GitOps with ArgoCD — make git the source of truth so pushing deploys automatically.
+
+
+---
 
 ## Day 2 — Namespaced environments, quotas, network policies, certs
 
