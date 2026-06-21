@@ -4,6 +4,20 @@ A running journal of what I built, what broke, and what I learned.
 Newest entries at the top.
 
 ---
+## Day 4 - 
+
+**NetworkPolicy diagnosis, sharpened (Day 4):**
+- Cross-checked the unresolved policy issue on the internet. Found that
+  k3s bundles kube-router to enforce NetworkPolicies. kube-router is why
+  my policies enforced at all.
+- My own dev experiment found out: same image, same setup, traffic toggled
+  purely by applying/removing the policy. The policy is the cause.
+- Sharpest diagnosis: Propably kube-router enforces the DENY correctly but mishandles the
+  selector-based ALLOW rule. Open question for the Calico migration: does Calico
+  handle the allow where kube-router doesn't?
+
+
+---
 ## Day 3 — First app deployed across all environments with Kustomize
 
 **Goal:** Deploy a real app (hello) into dev, staging, and prod from a single
