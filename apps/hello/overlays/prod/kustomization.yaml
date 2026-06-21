@@ -11,3 +11,10 @@ patches:
       - op: replace
         path: /spec/replicas
         value: 2
+  - target:
+      kind: Ingress
+      name: hello-ingress
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: hello-prod.localhost

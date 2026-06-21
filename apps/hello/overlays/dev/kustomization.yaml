@@ -3,3 +3,11 @@ kind: Kustomization
 namespace: dev
 resources:
   - ../../base
+patches:
+  - target:
+      kind: Ingress
+      name: hello-ingress
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: hello-dev.localhost
