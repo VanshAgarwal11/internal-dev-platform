@@ -4,6 +4,15 @@ A running journal of what I built, what broke, and what I learned.
 Newest entries at the top.
 
 ---
+## Day 5 -
+
+**Did:**
+
+
+
+**Learned:** 
+
+---
 ## Day 4 - 
 
 **NetworkPolicy diagnosis, sharpened (Day 4):**
@@ -16,6 +25,16 @@ Newest entries at the top.
   selector-based ALLOW rule. Open question for the Calico migration: does Calico
   handle the allow where kube-router doesn't?
 
+**Did:**
+- Learned to use/write Kustomize and overlays better by adding ingress to the hello app with per-environment hsotnames
+
+**Learned:** 
+- IngressClassName(in ingress.yaml) must name the real controller (ex: traefik), not an arbitrary string
+- An Ingress with no host matches all traffic
+- JSON-pointer patch paths like /spec/rules/0/host index into lists.
+
+**Next:**
+- GitOps with ArgoCD — make git the source of truth so pushing deploys automatically.
 
 ---
 ## Day 3 — First app deployed across all environments with Kustomize
@@ -38,7 +57,7 @@ source of truth, and learn the pattern that avoids per-environment config drift.
 - Small commits — why they help: For easy granular control and might help later to precisely find the right place to look at when something breaks.
 
 **Next:**
-- GitOps with ArgoCD — make git the source of truth so pushing deploys automatically.
+- Setup ingress on the hello app to make the pod accessible via browser.
 
 
 ---
