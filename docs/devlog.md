@@ -36,6 +36,10 @@ Newest entries at the top.
   recommendations against my own experimental data rather than trusting either. The experiment decided.
 
 
+**Learned:**
+- Made platform/environments/ GitOps-managed via ArgoCD. No sync-waves needed — ArgoCD's
+  retry-within-sync self-corrected the namespace-then-quota ordering on a clean-cluster rebuild.
+
 **Next:**
 - My environment setup was bucket-two YAML but not yet GitOps-managed — you applied it by hand. A future improvement would be to bring platform/environments/ under an ArgoCD Application too, so even namespaces are GitOps-managed. 
 
