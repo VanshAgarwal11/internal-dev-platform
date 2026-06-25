@@ -1,7 +1,7 @@
 # ADR 0003: Migrate from Flannel to Calico for NetworkPolicy enforcement
 
-**Status:** Proposed
-**Date:** 19th June 2026
+**Status:** Accepted
+**Date:** 25th June 2026
 
 ## Context
 The cluster ships with k3s's default Flannel CNI. Through controlled testing

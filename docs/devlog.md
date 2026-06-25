@@ -7,6 +7,20 @@ Newest entries at the top.
 
 ## Day 6 - 
 
+**Calico migration — NetworkPolicy finally enforced (Day 6, the payoff):**
+- Recreated the exact Day 2 test on the Calico cluster. Results:
+  - prod→prod WITH policies: SUCCEEDS (nginx page) — allow rule now enforces correctly.
+  - dev→prod WITH policies: TIMES OUT after 5003ms — deny enforces, Calico-style DROP.
+  - dev→prod AFTER deleting policies: SUCCEEDS again — control test proving the policy
+    caused the block, not unrelated networking.
+- The timeout (DROP) vs the old instant 2ms reject (kube-router REJECT/RST) is the visible
+  fingerprint confirming the CNI changed and now enforces per spec.
+- Proven end to end: my YAML was always correct; kube-router's allow handling was broken;
+  Calico fixes it. Closed a thread open since Day 2.
+- Meta-lesson: across this investigation I tested 3 allow formulations, adjudicated 2
+  conflicting AI opinions, and let controlled experiments decide every time. The experiment
+  is the authority, not the assistant.
+
 **Adjudicating Calico vs a cheap fix (engineering judgment):**
 - A second opinion argued the Calico migration was overkill and proposed a lighter fix:
   use namespaceSelector with the built-in kubernetes.io/metadata.name label instead of
@@ -20,6 +34,10 @@ Newest entries at the top.
   RST) rather than DROP, hence instant "connection refused" instead of a timeout.
 - Lesson: tested the cheap fix before the expensive one, and adjudicated two conflicting AI
   recommendations against my own experimental data rather than trusting either. The experiment decided.
+
+
+**Next:**
+- My environment setup was bucket-two YAML but not yet GitOps-managed — you applied it by hand. A future improvement would be to bring platform/environments/ under an ArgoCD Application too, so even namespaces are GitOps-managed. 
 
 ---
 ## Day 5 -
