@@ -4,15 +4,29 @@ A running journal of what I built, what broke, and what I learned.
 Newest entries at the top.
 
 ---
+
+## Day 6 - 
+
+**Adjudicating Calico vs a cheap fix (engineering judgment):**
+- A second opinion argued the Calico migration was overkill and proposed a lighter fix:
+  use namespaceSelector with the built-in kubernetes.io/metadata.name label instead of
+  an empty podSelector. Strong argument — don't rip out a CNI for a YAML quirk.
+- But I'd already tested a namespaceSelector on Day 2 and it failed. Tested this new
+  variant too (built-in label) — also failed, same instant REJECT.
+- Proven: kube-router fails to process ingress ALLOW rules regardless of formulation
+  (tested empty podSelector, custom namespaceSelector, built-in namespaceSelector — all 3 fail).
+  Not a syntax quirk; a broken allow implementation. Migration is justified.
+- Also learned the real cause of the 1ms error: kube-router uses iptables REJECT (sends TCP
+  RST) rather than DROP, hence instant "connection refused" instead of a timeout.
+- Lesson: tested the cheap fix before the expensive one, and adjudicated two conflicting AI
+  recommendations against my own experimental data rather than trusting either. The experiment decided.
+
+---
 ## Day 5 -
 
 **Did:**
  - Added ArgoCD
  - Restructured ArgoCD into app-of-apps: root Application managing hello-dev/staging/prod
-
-
-**Learned:** 
-
 
 
 **Watched ArgoCD self-heal (the GitOps payoff):**
@@ -23,6 +37,9 @@ Newest entries at the top.
 - Mindset shift: under GitOps you can't fix things with manual kubectl — changes not in
   git get reverted. The only way to change the cluster is to change git. Push-based habits
   (kubectl edit) are an anti-pattern here.
+
+  **Next:**
+  - Start with ADR-0003
 
 ---
 ## Day 4 - 
