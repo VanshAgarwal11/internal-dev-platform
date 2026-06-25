@@ -66,7 +66,7 @@ Phase 4. 16 GB can't run every component at once — bring stacks up/down per ph
 
 ## Current status — UPDATE THIS EACH DAY
 
-**Last updated:** End of Day 3 (2026-06-20)
+**Last updated:** End of Day 5 (2026-06-23)
 
 **Done so far:**
 - Day 1: toolchain installed (Docker, k3d, helm, kubectl); repo scaffolded;
@@ -77,6 +77,8 @@ Phase 4. 16 GB can't run every component at once — bring stacks up/down per ph
   below); Traefik inspected (bundled, not reinstalled); cert-manager installed
   via Helm; self-signed ClusterIssuer created and READY=True.
 - Day 3: hello app deployed across all three envs via Kustomize
+- Day 4: Added an ingress across all three envs to make the hello app accessible through browser
+- Day 5: Restructured ArgoCD into app-of-apps: root Application managing hello-dev/staging/prod
 
 **Key finding from Day 2 (important context):** This cluster DOES enforce the
 *deny* half of NetworkPolicy but NOT the *allow* (ingress `from`) half — proven

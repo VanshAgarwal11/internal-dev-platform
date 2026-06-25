@@ -7,10 +7,22 @@ Newest entries at the top.
 ## Day 5 -
 
 **Did:**
-
+ - Added ArgoCD
+ - Restructured ArgoCD into app-of-apps: root Application managing hello-dev/staging/prod
 
 
 **Learned:** 
+
+
+
+**Watched ArgoCD self-heal (the GitOps payoff):**
+- Manually scaled hello to 3 replicas with `kubectl scale`. ArgoCD detected the drift
+  (live=3 vs git=1), flipped OutOfSync, and reverted to 1 within a second — selfHeal in action.
+- Mechanism: ArgoCD continuously compares live state to git; selfHeal:true makes it
+  *correct* drift automatically, not just report it.
+- Mindset shift: under GitOps you can't fix things with manual kubectl — changes not in
+  git get reverted. The only way to change the cluster is to change git. Push-based habits
+  (kubectl edit) are an anti-pattern here.
 
 ---
 ## Day 4 - 
