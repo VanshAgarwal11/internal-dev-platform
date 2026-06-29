@@ -66,7 +66,11 @@ Phase 4. 16 GB can't run every component at once — bring stacks up/down per ph
 
 ## Current status — UPDATE THIS EACH DAY
 
-**Last updated:** End of Day 5 (2026-06-23)
+
+
+
+
+**Last updated:** End of Day 7 (2026-06-29)
 
 **Done so far:**
 - Day 1: toolchain installed (Docker, k3d, helm, kubectl); repo scaffolded;
@@ -79,6 +83,8 @@ Phase 4. 16 GB can't run every component at once — bring stacks up/down per ph
 - Day 3: hello app deployed across all three envs via Kustomize
 - Day 4: Added an ingress across all three envs to make the hello app accessible through browser
 - Day 5: Restructured ArgoCD into app-of-apps: root Application managing hello-dev/staging/prod
+- Day 6: Calico done and NetworkPolicies enforcing, environments GitOps-managed, and "Next up: observability stack (Prometheus +
+  Grafana via ArgoCD)
 
 **Key finding from Day 2 (important context):** This cluster DOES enforce the
 *deny* half of NetworkPolicy but NOT the *allow* (ingress `from`) half — proven
@@ -87,7 +93,7 @@ by a controlled dev-namespace experiment. Fix is to migrate to Calico (ADR
 now; the YAML stays in the repo as intent.
 
 **ADRs so far:** 0001 (use k3d), 0002 (namespace-per-environment isolation),
-0003 (migrate to Calico — Proposed, not yet done).
+0003 (migrate to Calico — Done).
 
 **Next up (Day 4):** Setup ingress on the hello app to make the pod accessible via browser.
 Start with setting up ArgoCD
