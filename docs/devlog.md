@@ -5,8 +5,7 @@ Newest entries at the top.
 
 ---
 
-## Day 6 - 
-
+## Day 6 - Calico migration: NetworkPolicy finally enforced
 **Calico migration — NetworkPolicy finally enforced (Day 6, the payoff):**
 - Recreated the exact Day 2 test on the Calico cluster. Results:
   - prod→prod WITH policies: SUCCEEDS (nginx page) — allow rule now enforces correctly.
@@ -44,7 +43,7 @@ Newest entries at the top.
 - My environment setup was bucket-two YAML but not yet GitOps-managed — you applied it by hand. A future improvement would be to bring platform/environments/ under an ArgoCD Application too, so even namespaces are GitOps-managed. 
 
 ---
-## Day 5 -
+## Day 5 - ArgoCD and the app-of-apps pattern
 
 **Did:**
  - Added ArgoCD
@@ -64,7 +63,7 @@ Newest entries at the top.
   - Start with ADR-0003
 
 ---
-## Day 4 - 
+## Day 4 - Kustomize and NetworkPolicy
 
 **NetworkPolicy diagnosis, sharpened (Day 4):**
 - Cross-checked the unresolved policy issue on the internet. Found that

@@ -10,3 +10,4 @@ kubeconfig
 secrets/
 *.key
 *.pem
+docs/PROJECT_BRIEF.md
