@@ -6,10 +6,11 @@ set -euo pipefail
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
 
-helm install cert-manager jetstack/cert-manager \
+helm upgrade --install cert-manager jetstack/cert-manager \
   --namespace cert-manager \
   --create-namespace \
-  --set crds.enabled=true
+  --set crds.enabled=true \
+  --wait
 
 echo "Waiting for cert-manager webhook to be ready..."
 kubectl wait --for=condition=available --timeout=300s \

@@ -47,6 +47,16 @@ whole platform rebuilds from git on a clean cluster.
 - Meta-lesson: reasoned-correct ≠ proven-correct. The rebuild test caught bugs that
   "works on my running cluster" never would have.
 
+**Hardened bootstrap scripts for idempotency and slow connections:**
+- Made install-calico.sh idempotent: `kubectl apply --server-side` (not `create`) so re-runs
+  don't error on existing resources.
+- Fixed the "no matching resources found" wait race with a brief sleep before `kubectl wait`
+  (pods must exist before you can wait on them).
+- Raised cold-start timeouts to 900s — a slow-WiFi cold pull took ~6 min PER Calico image;
+  generous timeouts cost nothing when fast, save you when slow.
+- Principle: bootstrap steps should be safe to re-run (idempotent) so a partial failure just
+  means "run it again," not "manually clean up then run again."
+
 **Next:**
 - Finish the rebuild to fully prove reproducibility end-to-end.
 - Commit the hardened idempotent scripts.

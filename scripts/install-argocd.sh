@@ -9,7 +9,7 @@ kubectl apply -n argocd \
   --server-side
 
 echo "Waiting for argocd-server to be ready..."
-kubectl wait --for=condition=available --timeout=300s \
+kubectl wait --for=condition=available --timeout=900s \
   deployment/argocd-server -n argocd
 
 echo "ArgoCD installed. Get the admin password with:"
