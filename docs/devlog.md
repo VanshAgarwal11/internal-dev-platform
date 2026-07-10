@@ -3,6 +3,55 @@
 A running journal of what I built, what broke, and what I learned.
 Newest entries at the top.
 
+
+---
+## Day 7 — Observability stack + reproducibility hardening
+
+**Goal:** Add monitoring (Prometheus + Grafana) the GitOps way, then prove the
+whole platform rebuilds from git on a clean cluster.
+
+**Did:**
+- Deployed kube-prometheus-stack via a single ArgoCD Application (Helm source,
+  inline values), trimmed for 16GB (Alertmanager disabled, short retention,
+  capped resources). One `git push` → root app auto-detected it → stack deployed.
+- Set explicit resource requests/limits in the hello base Deployment (deterministic
+  QoS, no longer LimitRange-dependent).
+- Added scripts/bootstrap-all.sh to orchestrate the full bootstrap with
+  condition-based waits.
+- Hardened install scripts for idempotency and slow-connection cold pulls.
+
+**Learned — the "no data" panel that found a real bug:**
+- Grafana CPU/memory *utilization* panels showed "no data" for dev but worked for
+  prod. Root cause: dev's hello pod was `besteffort` QoS (no resource requests), so
+  utilization = usage ÷ requests had no denominator. prod's pods were `burstable`.
+- Why dev lost its requests: on the Calico rebuild, ArgoCD created the hello pod
+  BEFORE the LimitRange existed in that namespace — and LimitRange only injects into
+  pods created after it. Ordering race between two separate ArgoCD Applications.
+- Fix: set requests explicitly in the Deployment (deterministic, order-independent).
+  LimitRange stays as a safety net for apps that forget. Belt and suspenders.
+- QoS classes: besteffort (no requests) / burstable (some) / guaranteed (requests=limits).
+- Meta-lesson: "no data" on a dashboard didn't mean monitoring was broken — monitoring
+  correctly surfaced a real workload misconfiguration. Observability doing its job.
+
+**Learned — the clean-rebuild test found ordering + idempotency bugs:**
+- cert-manager install failed on rebuild because Calico wasn't Ready yet (no networking
+  → startupapicheck couldn't reach the API). Bootstrap steps have ordering dependencies.
+- Failed install left a partial Helm release; retry broke with "name already in use"
+  because scripts used non-idempotent `helm install`. Fix: `helm upgrade --install --wait`.
+- "Stuck" Calico (~17 min in ContainerCreating) was SLOW IMAGE PULLS on slow WiFi
+  (calico/cni took 6 min, calico/node 5m43s to pull), NOT resource starvation — diagnosed
+  via `kubectl get events`. Pods were besteffort and scheduled instantly.
+- `kubectl wait --timeout=300s` was too short for a cold pull. Raised to 900s. Timeouts
+  must budget worst-case cold-pull time, not warm-cluster time. Images now cached → next
+  rebuild far faster.
+- Meta-lesson: reasoned-correct ≠ proven-correct. The rebuild test caught bugs that
+  "works on my running cluster" never would have.
+
+**Next:**
+- Finish the rebuild to fully prove reproducibility end-to-end.
+- Commit the hardened idempotent scripts.
+- Consider: is monitoring too heavy for the always-on core, or bring it up separately?
+
 ---
 
 ## Day 6 - Calico migration: NetworkPolicy finally enforced
