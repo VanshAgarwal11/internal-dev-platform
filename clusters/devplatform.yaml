@@ -1,3 +1,5 @@
+# This is a k3d cluster configuration file for the devplatform cluster which uses flannel which is the default CNI for k3s.
+
 apiVersion: k3d.io/v1alpha5
 kind: Simple
 metadata:

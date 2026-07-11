@@ -3,6 +3,8 @@
 A running journal of what I built, what broke, and what I learned.
 Newest entries at the top.
 
+---
+## Day 8 - 
 
 ---
 ## Day 7 — Observability stack + reproducibility hardening
@@ -192,7 +194,7 @@ and automated certificate management.
 - "Inspect before installing" — k3d already bundles Traefik, so installing nginx would have caused two controllers to fight over the same ports.
 - CRDs (Custom Resource Definitions) are how cert-manager teaches Kubernetes new object types like `Certificate` and `ClusterIssuer`; they must be installed for those kinds to exist.
 
-**The NetworkPolicy investigation (the big one):**
+**The NetworkPolicy investigation:**
 - Set out expecting NetworkPolicies would NOT be enforced (the common claim is that Flannel doesn't implement them). The opposite turned out to be true.
 - Ran a controlled experiment in dev: target+client worked reliably with no policy (3x in a row), failed the instant both policies were applied, and worked again once policies were removed. One variable, repeatable in both directions — this proved the cluster DOES enforce NetworkPolicy.
 - But the allow rule never restored traffic. Tested empty `podSelector: {}` and an explicit `namespaceSelector` (matchLabels environment=dev) — both failed. Only the deny half ever worked.
