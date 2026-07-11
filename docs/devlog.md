@@ -6,6 +6,14 @@ Newest entries at the top.
 ---
 ## Day 8 - 
 
+
+**Learned:**
+- Docker `-p hostPort:containerPort` — the container port MUST match what the app actually
+  listens on inside (greeter listens on 8080). `-p 8082:8082` failed because nothing listens
+  on 8082 in the container. Correct: `-p 8090:8080` (any free host port → container's 8080).
+- Host 8080 was already taken (k3d's Traefik mapping), which is why `curl :8080` hit the
+  cluster (404) not the container. Container ports and host ports are independent namespaces.
+- Multi-stage build result: 4.5MB image (vs ~300MB+ single-stage). Distroless + static binary.
 ---
 ## Day 7 — Observability stack + reproducibility hardening
 
