@@ -4,16 +4,43 @@ A running journal of what I built, what broke, and what I learned.
 Newest entries at the top.
 
 ---
-## Day 8 - 
+## Day 8 — CI/CD: built a real app, containerized it, and wired it through the pipeline
 
+**Goal:** Build the "push code → it ships" loop — a real app of my own, a container
+image built by CI, deployed via the existing GitOps setup.
+
+**Did:**
+- Wrote a minimal Go web server (greeter) with a version endpoint and a /healthz health check.
+- Wrote a multi-stage Dockerfile: build stage compiles a static binary, final stage ships
+  only the binary on distroless. Result: 4.5MB image (vs ~300MB+ single-stage).
+- Added a GitHub Actions workflow: builds the image on push and pushes to GHCR, tagged
+  :latest and :<commit-sha>, using the built-in GITHUB_TOKEN (no stored secrets).
+- Deployed greeter via Kustomize (base + dev overlay) and a child ArgoCD Application under
+  the app-of-apps root — same pattern as hello. ArgoCD pulled the GHCR image and ran it.
 
 **Learned:**
-- Docker `-p hostPort:containerPort` — the container port MUST match what the app actually
-  listens on inside (greeter listens on 8080). `-p 8082:8082` failed because nothing listens
-  on 8082 in the container. Correct: `-p 8090:8080` (any free host port → container's 8080).
-- Host 8080 was already taken (k3d's Traefik mapping), which is why `curl :8080` hit the
-  cluster (404) not the container. Container ports and host ports are independent namespaces.
-- Multi-stage build result: 4.5MB image (vs ~300MB+ single-stage). Distroless + static binary.
+- Multi-stage Docker builds: compile in a toolchain image, COPY only the binary into a
+  minimal (distroless) final image. Tiny + minimal attack surface. CGO_ENABLED=0 makes a
+  fully static binary, which is what lets distroless work (no libc needed).
+- A trivial app still benefits from a version endpoint (visible proof of what's deployed)
+  and a /healthz check (wired to a Kubernetes readinessProbe — pod only gets traffic when healthy).
+- CI and CD stay separate: GitHub Actions builds + pushes the image and updates git; ArgoCD
+  deploys from git. CI never touches the cluster — no cluster credentials needed. Secure + auditable.
+- Tagging with the commit SHA (not just :latest) makes every image traceable to its exact commit.
+
+**Bugs hit and fixed:**
+- Docker `-p hostPort:containerPort` — the container side must match the app's real port (8080).
+  `-p 8082:8082` failed because nothing listens on 8082 in the container. Host 8080 was also
+  taken by k3d's Traefik, so `curl :8080` hit the cluster (404), not my container.
+- GHCR tag rejected: OCI/registry repository names must be lowercase. `github.repository_owner`
+  keeps username case (VanshAgarwal11), so I lowercased it (`${VAR,,}`) before building the tag.
+- GHCR images are private by default — the local cluster couldn't pull until I made the package
+  public (alternative: an imagePullSecret).
+
+**Next:**
+- Close the loop: auto-update the image tag in git when CI builds (ArgoCD Image Updater or a
+  CI commit step), so a code push deploys with zero manual steps.
+
 ---
 ## Day 7 — Observability stack + reproducibility hardening
 
