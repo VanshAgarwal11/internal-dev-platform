@@ -5,11 +5,12 @@ on:
     branches:
       - main
     paths:
-      - 'apps/greeter/**'
+      - 'apps/greeter/src/**'
+      - 'apps/greeter/Dockerfile'
       - '.github/workflows/greeter-ci.yaml'
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -37,3 +38,22 @@ jobs:
           tags: |
             ghcr.io/${{ env.OWNER_LC }}/greeter:latest
             ghcr.io/${{ env.OWNER_LC }}/greeter:${{ github.sha }}
+
+      - name: Update deployment manifest with new image tag
+        run: |
+          NEW_IMAGE="ghcr.io/${{ env.OWNER_LC }}/greeter:${{ github.sha }}"
+          sed -i "s|image: ghcr.io/${{ env.OWNER_LC }}/greeter:.*|image: ${NEW_IMAGE}|" \
+            apps/greeter/k8s/base/deployment.yaml
+          echo "Updated manifest to: ${NEW_IMAGE}"
+
+      - name: Commit the updated manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add apps/greeter/k8s/base/deployment.yaml
+          if git diff --staged --quiet; then
+            echo "No manifest change to commit."
+          else
+            git commit -m "ci: bump greeter image to ${{ github.sha }} [skip ci]"
+            git push
+          fi
