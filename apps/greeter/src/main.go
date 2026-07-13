@@ -14,7 +14,7 @@ func main() {
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello from greeter! Version: %s\n", version)
+		fmt.Fprintf(w, "Hello from greeter v2 — auto-deploy test! Version: %s\n", version)
 	})
 
 	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
