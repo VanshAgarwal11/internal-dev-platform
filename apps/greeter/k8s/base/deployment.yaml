@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: greeter
-        image: ghcr.io/vanshagarwal11/greeter:556693e95b2ef19ff4d2aaf59679586786a25cb0
+        image: ghcr.io/vanshagarwal11/greeter:dba145400f8071c868fdd877d8bb898811eda024
         ports:
         - containerPort: 8080
         resources:
