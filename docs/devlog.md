@@ -4,6 +4,17 @@ A running journal of what I built, what broke, and what I learned.
 Newest entries at the top.
 
 ---
+## Day 9 - 
+
+- Manual tag management is confusing even in a trivial case: git said the v2 code was in commit
+  f53c74c, but the working IMAGE that contained v2 was tagged 556693e (built later, on top of v2).
+  Pinning the "obvious" SHA (f53c74c per git log) served OLD code; the non-obvious one (556693e)
+  served new code. Took real detective work to sort out which SHA mapped to which image content.
+- Nothing errored at any point — wrong-but-valid tags deploy happily and serve stale code silently.
+- Conclusion: humans should NOT be hand-mapping commits to image tags. Automation that updates the
+  tag from the actual build output removes the entire class of "pinned the wrong SHA" errors.
+
+---
 ## Day 8 — CI/CD: built a real app, containerized it, and wired it through the pipeline
 
 **Goal:** Build the "push code → it ships" loop — a real app of my own, a container
