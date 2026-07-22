@@ -14,6 +14,20 @@ Newest entries at the top.
 - Conclusion: humans should NOT be hand-mapping commits to image tags. Automation that updates the
   tag from the actual build output removes the entire class of "pinned the wrong SHA" errors.
 
+
+  **Closed the CI/CD loop — code push to running pod, hands-free:**
+- Added a CI step that sed-updates deployment.yaml with the SHA it just built, then commits
+  it back to git. ArgoCD sees the manifest change and deploys.
+- Tested end-to-end: changed main.go to v3, pushed, did NOTHING else. Watched curl return v2,
+  v2, then v3 — caught the rollout mid-flight.
+- Loop guards against infinite CI: narrowed the path filter to apps/greeter/src + Dockerfile
+  (so manifest commits don't re-trigger), plus [skip ci] in the bot's commit message.
+- Cost of this pattern: the bot commits to main, so my local branch diverges → must `git pull`
+  before pushing. Set `pull.rebase true` for linear history. Rebase also requires a clean tree
+  (had to commit my devlog edit first).
+- CI knows the correct SHA by construction — eliminating the "pinned the wrong SHA" class of
+  error I hit doing it manually earlier.
+
 ---
 ## Day 8 — CI/CD: built a real app, containerized it, and wired it through the pipeline
 
