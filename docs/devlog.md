@@ -10,9 +10,15 @@ Newest entries at the top.
   Full loop worked on the fresh cluster — proving reproducibility AND automation together.
 - End-to-end latency ~12 min, broken down: ~5 min waiting for a GitHub-hosted runner (free-tier
   queue), ~5 min for the build+push job, ~1-2 min for ArgoCD to poll git and sync.
+
+**Learned:**
 - The sync lag is ArgoCD's polling interval (default 3 min). Production fix is a webhook so
   GitHub notifies ArgoCD on push instead of polling — not feasible here since ArgoCD runs
   locally with no public URL. Legitimate constraint of a local setup, worth noting.
+- Ngrok (or similar tunnel) could expose local ArgoCD to GitHub for a webhook, which I've done
+  in a previous role. Deliberately skipped here: free-tier ngrok URLs are ephemeral and break
+  on restart, so it'd be a demo trick rather than a durable part of a reproducible platform.
+  Documented as a known constraint instead.
 
 ---
 ## Day 9 — Closing the CI/CD loop: from manual tag bumps to hands-free deploys
