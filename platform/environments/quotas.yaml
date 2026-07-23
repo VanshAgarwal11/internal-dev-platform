@@ -1,3 +1,4 @@
+# sized to real shared-host capacity, not node allocatable
 apiVersion: v1
 kind: ResourceQuota
 metadata:

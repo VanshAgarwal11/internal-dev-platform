@@ -1,3 +1,5 @@
+# k3d cluster config for the platform, with Calico as the CNI instead of the
+# k3s default. See docs/decisions/0003-migrate-to-calico-for-networkpolicy.md.
 apiVersion: k3d.io/v1alpha5
 kind: Simple
 metadata:
@@ -5,6 +7,8 @@ metadata:
 servers: 1
 agents: 2
 ports:
+  # Maps host ports to the cluster's load balancer so Traefik-routed apps are
+  # reachable from the browser. Host 8080 -> cluster 80, host 8443 -> cluster 443.
   - port: 8080:80
     nodeFilters:
       - loadbalancer
@@ -14,12 +18,21 @@ ports:
 options:
   k3s:
     extraArgs:
+      # Disable the bundled Flannel CNI so Calico can take over networking.
+      # A CNI cannot be swapped on a running cluster — this must be set at creation,
+      # which is why the Calico migration required a full cluster rebuild.
       - arg: --flannel-backend=none
         nodeFilters:
           - server:*
+      # Disable k3s's built-in NetworkPolicy controller (kube-router). It enforces
+      # deny rules but silently ignores selector-based allow rules, so a default-deny
+      # paired with an allow rule blocks everything. Turning it off lets Calico's
+      # spec-compliant policy engine handle enforcement instead.
       - arg: --disable-network-policy
         nodeFilters:
           - server:*
+      # Must match the ipPool CIDR configured in scripts/install-calico.sh.
+      # Calico's default pool expects 192.168.0.0/16; a mismatch here breaks pod networking.
       - arg: --cluster-cidr=192.168.0.0/16
         nodeFilters:
           - server:*

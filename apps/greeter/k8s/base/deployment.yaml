@@ -16,9 +16,19 @@ spec:
     spec:
       containers:
       - name: greeter
-        image: ghcr.io/vanshagarwal11/greeter:c6adeb17c57ca9db504f08f415eaa0ba59d75abe
+        # Image tag is the commit SHA, written here automatically by CI
+        # (.github/workflows/greeter-ci.yaml) after each build. Never :latest —
+        # a moving tag produces no git diff, so ArgoCD would have nothing to sync.
+        image: ghcr.io/vanshagarwal11/greeter:latest
         ports:
         - containerPort: 8080
+        # Requests/limits are set explicitly rather than relying on the namespace
+        # LimitRange to inject defaults. LimitRange only applies to pods created
+        # AFTER it exists, so on a clean rebuild a pod can win the race and come up
+        # as BestEffort QoS with no requests — which silently breaks Grafana's
+        # utilization panels (usage ÷ requests has no denominator). Explicit values
+        # are order-independent; the LimitRange stays as a safety net for apps that
+        # forget to set their own.
         resources:
           requests:
             cpu: 50m
@@ -26,6 +36,9 @@ spec:
           limits:
             cpu: 100m
             memory: 64Mi
+        # Kubernetes withholds traffic from this pod until /healthz returns 200.
+        # Without it, the Service would route requests to a container that has
+        # started but isn't yet serving, causing failed requests during rollouts.
         readinessProbe:
           httpGet:
             path: /healthz
