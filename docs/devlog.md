@@ -4,6 +4,17 @@ A running journal of what I built, what broke, and what I learned.
 Newest entries at the top.
 
 ---
+## Day 9 — Post-rebuild verification
+**Did:**
+- Deleted the cluster, rebuilt with `scripts/bootstrap-all.sh`, then pushed a code change (v4).
+  Full loop worked on the fresh cluster — proving reproducibility AND automation together.
+- End-to-end latency ~12 min, broken down: ~5 min waiting for a GitHub-hosted runner (free-tier
+  queue), ~5 min for the build+push job, ~1-2 min for ArgoCD to poll git and sync.
+- The sync lag is ArgoCD's polling interval (default 3 min). Production fix is a webhook so
+  GitHub notifies ArgoCD on push instead of polling — not feasible here since ArgoCD runs
+  locally with no public URL. Legitimate constraint of a local setup, worth noting.
+
+---
 ## Day 9 — Closing the CI/CD loop: from manual tag bumps to hands-free deploys
 
 **Goal:** Make a code push deploy automatically. Until now CI built images but
