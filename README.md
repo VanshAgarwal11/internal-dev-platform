@@ -165,4 +165,4 @@ This is a learning platform, not a production system. Deliberate trade-offs:
 
 ---
 
-Built by Vansh Agarwal · [LinkedIn](www.linkedin.com/in/vansh-agarwal-a95481294)
+Built by Vansh Agarwal · [LinkedIn](https://www.linkedin.com/in/vansh-agarwal-a95481294)
