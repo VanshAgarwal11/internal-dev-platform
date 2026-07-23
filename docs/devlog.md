@@ -4,29 +4,56 @@ A running journal of what I built, what broke, and what I learned.
 Newest entries at the top.
 
 ---
-## Day 9 - 
+## Day 9 — Closing the CI/CD loop: from manual tag bumps to hands-free deploys
 
-- Manual tag management is confusing even in a trivial case: git said the v2 code was in commit
-  f53c74c, but the working IMAGE that contained v2 was tagged 556693e (built later, on top of v2).
-  Pinning the "obvious" SHA (f53c74c per git log) served OLD code; the non-obvious one (556693e)
-  served new code. Took real detective work to sort out which SHA mapped to which image content.
-- Nothing errored at any point — wrong-but-valid tags deploy happily and serve stale code silently.
-- Conclusion: humans should NOT be hand-mapping commits to image tags. Automation that updates the
-  tag from the actual build output removes the entire class of "pinned the wrong SHA" errors.
+**Goal:** Make a code push deploy automatically. Until now CI built images but
+nothing told GitOps to deploy them — the last manual step in the pipeline.
 
+**Did:**
+- Reproduced the problem deliberately: changed the app, pushed, watched CI build a new
+  image — and the cluster kept serving old code.
+- Fixed it manually once (hand-pinned an image SHA in the Deployment) to feel the toil.
+- Automated it: added a CI step that writes the just-built SHA into deployment.yaml and
+  commits it back to git. ArgoCD sees the manifest change and deploys.
+- Verified end-to-end: changed main.go to v3, pushed, did nothing else. Watched curl
+  return v2, v2, then v3 — caught the rollout mid-flight.
 
-  **Closed the CI/CD loop — code push to running pod, hands-free:**
-- Added a CI step that sed-updates deployment.yaml with the SHA it just built, then commits
-  it back to git. ArgoCD sees the manifest change and deploys.
-- Tested end-to-end: changed main.go to v3, pushed, did NOTHING else. Watched curl return v2,
-  v2, then v3 — caught the rollout mid-flight.
-- Loop guards against infinite CI: narrowed the path filter to apps/greeter/src + Dockerfile
-  (so manifest commits don't re-trigger), plus [skip ci] in the bot's commit message.
-- Cost of this pattern: the bot commits to main, so my local branch diverges → must `git pull`
-  before pushing. Set `pull.rebase true` for linear history. Rebase also requires a clean tree
-  (had to commit my devlog edit first).
-- CI knows the correct SHA by construction — eliminating the "pinned the wrong SHA" class of
-  error I hit doing it manually earlier.
+**Learned — why the image never updated:**
+- The Deployment referenced `greeter:latest`. CI pushed a new image behind that tag, but
+  the manifest text in git was byte-identical, so ArgoCD saw no diff and had nothing to sync.
+- `:latest` is a moving target — you can't tell which build is running, and Kubernetes won't
+  re-pull a tag it already has. This is why `:latest` is an anti-pattern in production.
+- The fix is to make each build produce a *unique* image reference (the commit SHA tag) and
+  update the manifest to point at it — a real git change ArgoCD will detect.
+
+**Learned — manual tag management is error-prone in a way that doesn't error:**
+- git said the v2 code was in commit f53c74c, but the image *containing* v2 was tagged
+  556693e (built later, on top of v2). Pinning the "obvious" SHA served OLD code; the
+  non-obvious one served new code.
+- Nothing failed at any point — the pod was Running 1/1, ArgoCD was Synced, and it quietly
+  served stale code. Wrong-but-valid tags deploy happily.
+- Also: a commit touching only deployment.yaml doesn't trigger a build (CI path filter is
+  on src/ + Dockerfile), so no image exists for that SHA. Mapping commits→images by hand
+  requires reasoning about path filters, build order, and content — all to get one string right.
+- Conclusion: humans should not hand-map commits to image tags. CI knows the correct SHA by
+  construction, which eliminates the entire "pinned the wrong SHA" class of error.
+
+**Learned — the cost of CI-writes-to-git:**
+- The bot commits to main, so my local branch diverges whenever I commit while CI commits
+  remotely. Not a bug — the inherent trade-off of this pattern.
+- New habit: always `git pull` before `git push`. Set `pull.rebase true` so my commits replay
+  on top of the bot's, keeping history linear rather than littered with merge commits.
+- Rebase requires a clean working tree (had to commit a devlog edit before pulling).
+- The alternative (ArgoCD Image Updater) wouldn't touch my branch, but costs cluster RAM.
+  I chose CI-commits for lower resource use; this is its price.
+
+**Loop-prevention (important):**
+- A workflow that commits to its own repo can retrigger itself infinitely. Two guards:
+  narrowed the path filter to `apps/greeter/src/**` + Dockerfile (so manifest commits don't
+  match), plus `[skip ci]` in the bot's commit message.
+
+**Next:**
+- Polish: README with architecture diagram, repo tidy, demo recording.
 
 ---
 ## Day 8 — CI/CD: built a real app, containerized it, and wired it through the pipeline

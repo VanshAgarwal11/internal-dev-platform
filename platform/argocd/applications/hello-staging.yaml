@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/VanshAgarwal11/internal-dev-platform.git
     targetRevision: main
-    path: apps/hello/overlays/staging
+    path: apps/hello/k8s/overlays/staging
   destination:
     server: https://kubernetes.default.svc
     namespace: staging
