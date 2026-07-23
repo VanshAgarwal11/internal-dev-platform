@@ -19,7 +19,7 @@ func main() {
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello from greeter v3 — FULLY automated! Version: %s\n", version)
+		fmt.Fprintf(w, "Hello from greeter v4 — post-rebuild test! Version: %s\n", version)
 	})
 
 	// Liveness/readiness endpoint. The Deployment's readinessProbe polls this, so
