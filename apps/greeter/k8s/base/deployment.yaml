@@ -19,7 +19,7 @@ spec:
         # Image tag is the commit SHA, written here automatically by CI
         # (.github/workflows/greeter-ci.yaml) after each build. Never :latest —
         # a moving tag produces no git diff, so ArgoCD would have nothing to sync.
-        image: ghcr.io/vanshagarwal11/greeter:ff55b5f6ffd803b2ca8361fe589ce1d53a137c4b
+        image: ghcr.io/vanshagarwal11/greeter:e19c02b6bac0c038d83c681eab278d2cc3493cdb
         ports:
         - containerPort: 8080
         # Requests/limits are set explicitly rather than relying on the namespace
