@@ -4,7 +4,8 @@ A self-service Kubernetes platform where a developer pushes code and the platfor
 deploys it across isolated environments, monitors it, and enforces resource and network
 guardrails — with no tickets, no hand-written YAML, and no manual deploy steps.
 
-Built solo as a hands-on platform-engineering project. Runs entirely locally at zero cloud cost.
+Built solo as a hands-on platform-engineering project, running entirely on a laptop at zero
+cloud cost.
 
 **Stack:** k3d · Kubernetes · Calico · ArgoCD · Kustomize · Helm · cert-manager · Traefik ·
 Prometheus · Grafana · GitHub Actions · GHCR · Go · Docker
@@ -19,7 +20,7 @@ Prometheus · Grafana · GitHub Actions · GHCR · Go · Docker
 | **GitOps delivery** | ArgoCD app-of-apps — git is the single source of truth; drift self-corrects |
 | **CI/CD** | GitHub Actions builds a container image, pushes to GHCR, and commits the new image tag back to git; ArgoCD deploys it |
 | **Observability** | Prometheus + Grafana, themselves deployed via GitOps |
-| **Reproducibility** | One script + one `kubectl apply` rebuilds the entire platform from git — tested by destroying and rebuilding the cluster |
+| **Reproducibility** | One script rebuilds the entire platform from git — verified by destroying and rebuilding the cluster |
 | **Automated TLS** | cert-manager issues and renews certificates |
 
 ## Architecture
@@ -56,9 +57,10 @@ and the cluster can never silently drift from what's committed.
 Rather than a feature list, these are the problems that took real debugging:
 
 **Diagnosed a partial NetworkPolicy implementation.** Policies appeared to work but same-namespace
-traffic was blocked. Controlled experiments across three rule formulations proved k3s's default
-policy controller enforces `deny` rules but silently ignores `allow` rules. Migrated to Calico on
-a feature branch and verified enforcement with a before/after test.
+traffic was blocked. Controlled experiments across three rule formulations — isolating one variable
+at a time and toggling policies in both directions — proved k3s's default policy controller enforces
+`deny` rules but silently ignores selector-based `allow` rules. Migrated to Calico on a feature
+branch and verified enforcement with a before/after test.
 → [ADR 0003](docs/decisions/0003-migrate-to-calico-for-networkpolicy.md)
 
 **Found a workload misconfiguration through observability.** A Grafana panel showing "no data"
@@ -66,22 +68,23 @@ turned out to be correct behaviour — it exposed that pods in one namespace had
 (BestEffort QoS), caused by a sync-ordering race where pods were created before the LimitRange
 existed. Fixed by setting requests explicitly rather than depending on injection order.
 
-**Proved reproducibility by destroying the cluster.** Rebuilding from git surfaced three real bugs
-that a running cluster never would have: an ordering dependency (cert-manager installed before the
-CNI was ready), non-idempotent bootstrap scripts, and readiness timeouts too short for cold image
-pulls. All fixed; the rebuild now works end-to-end.
+**Proved reproducibility by destroying the cluster.** Rebuilding from git surfaced three bugs that
+a running cluster never would have: an ordering dependency (cert-manager installed before the CNI
+was ready), non-idempotent bootstrap scripts, and readiness timeouts too short for cold image
+pulls. All fixed; the rebuild now completes end to end.
 
 **Eliminated a class of silent deployment errors.** Manually pinning image tags meant hand-mapping
 commits to images — and pinning a *valid but wrong* SHA deploys stale code with no error anywhere.
 Automating the tag update from CI's own build output removed the failure mode entirely.
 
-The full build journal, including the wrong turns, is in [`docs/devlog.md`](docs/devlog.md).
+The full build journal, including the wrong turns and dead ends, is in
+[`docs/devlog.md`](docs/devlog.md).
 
 ---
 
 ## Running it locally
 
-**Prerequisites:** Docker Desktop, `kubectl`, `k3d`, `helm`, `git`. Allocate at least 8 GB to Docker.
+**Prerequisites:** Docker Desktop, `kubectl`, `k3d`, `helm`, and `git`.
 
 ```bash
 git clone https://github.com/VanshAgarwal11/internal-dev-platform.git
@@ -96,6 +99,10 @@ monitoring stack — from git.
 
 The scripts are idempotent: if a step fails (slow network, a cold image pull), re-run the same
 command and it resumes rather than erroring.
+
+The monitoring stack is the heaviest component. On a memory-constrained machine, giving Docker
+around 8 GB keeps the full platform comfortable; the core platform without monitoring runs in
+considerably less.
 
 **Access ArgoCD:**
 
@@ -118,6 +125,9 @@ Then open `http://localhost:3000` (user `admin`, password `admin`).
 **See the CI/CD loop work:** edit the message in `apps/greeter/src/main.go`, commit, and push.
 CI builds a new image, commits the new tag, and ArgoCD deploys it — end to end in roughly ten
 minutes with no further action.
+
+> Chart and image versions are pinned to what was current at build time. If a pinned version has
+> since been withdrawn upstream, bumping the version in the relevant manifest is usually enough.
 
 ## Repository layout
 
@@ -153,12 +163,12 @@ This is a learning platform, not a production system. Deliberate trade-offs:
 - **ArgoCD polls git** (~3 min interval) rather than receiving webhooks, because a local cluster
   has no public endpoint for GitHub to call. In production a webhook would cut sync latency to
   seconds; a tunnel like ngrok would work locally but only while the tunnel is up.
-- **Alertmanager is disabled** and no custom alert rules are written — the full monitoring stack
-  is the heaviest tenant and this keeps the platform inside an 8 GB Docker allocation.
+- **Alertmanager is disabled** and no custom alert rules are written — the monitoring stack is the
+  heaviest tenant and this keeps the platform comfortable on a laptop.
 - **Self-signed certificates.** cert-manager is wired to a self-signed ClusterIssuer; the mechanism
   is identical to production, but a public CA like Let's Encrypt needs a real domain.
-- **Single-node-equivalent cluster.** k3d's three "nodes" are containers sharing one host, so node
-  allocatable figures over-report available capacity — quotas are sized against real shared capacity.
+- **Single-host cluster.** k3d's three "nodes" are containers sharing one host, so node allocatable
+  figures over-report available capacity — quotas are sized against real shared capacity instead.
 - **CI commits to `main`**, so local work must be rebased on the bot's commits. ArgoCD Image Updater
   would avoid this but costs cluster memory; the trade-off was made deliberately.
 - **`greeter` is deployed to `dev` only**; `hello` spans all three environments.
